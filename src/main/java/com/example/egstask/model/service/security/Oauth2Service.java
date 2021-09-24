@@ -1,12 +1,13 @@
 package com.example.egstask.model.service.security;
 
 import com.example.egstask.model.dto.response.TokenRes;
+import com.example.egstask.model.entity.EgsUser;
 import com.example.egstask.model.entity.Role;
+import com.example.egstask.model.entity.security.CustomUserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
@@ -28,7 +29,7 @@ public class Oauth2Service {
         this.defaultTokenServices = defaultTokenServices;
     }
 
-    public TokenRes getToken(String username, String plainPassword, Set<Role> roles) {
+    public TokenRes getToken(EgsUser user, String username, String plainPassword, Set<Role> roles) {
         HashMap<String, String> authorizationParameters = getAuthorizationParameters(username, plainPassword);
         Set<GrantedAuthority> authorities = getAuthorities(roles);
         Set<String> responseType = getResponseType();
@@ -39,13 +40,7 @@ public class Oauth2Service {
                 authorities, true, scopes, null, "",
                 responseType, null);
 
-        User userPrincipal = new User(username
-                , plainPassword,
-                true,
-                true,
-                true,
-                true,
-                authorities);
+        CustomUserPrincipal userPrincipal = new CustomUserPrincipal(user);
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 userPrincipal, null, authorities);
@@ -59,7 +54,7 @@ public class Oauth2Service {
 
     private Set<GrantedAuthority> getAuthorities(Set<Role> roles) {
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.toString()))
+                .map(role -> new SimpleGrantedAuthority(role.getRole()))
                 .collect(Collectors.toSet());
     }
 

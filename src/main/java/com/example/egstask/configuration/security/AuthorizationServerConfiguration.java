@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -28,8 +29,7 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import javax.sql.DataSource;
 import java.util.Objects;
 
-import static com.example.egstask.common.Constants.ACCESS_TOKEN_EXPIRY_TIME;
-import static com.example.egstask.common.Constants.REFRESH_TOKEN_EXPIRY_TIME;
+import static com.example.egstask.common.Constants.*;
 
 @Configuration
 @EnableAuthorizationServer
@@ -51,6 +51,13 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
         this.env = env;
         this.authenticationManager = authenticationManager;
         this.userService = userService;
+    }
+
+    @Override
+    public void configure(final AuthorizationServerSecurityConfigurer oauthServer) {
+        oauthServer.tokenKeyAccess("permitAll()").checkTokenAccess("permitAll()");
+        oauthServer.allowFormAuthenticationForClients();
+        oauthServer.passwordEncoder(passwordEncoder());
     }
 
     @Override

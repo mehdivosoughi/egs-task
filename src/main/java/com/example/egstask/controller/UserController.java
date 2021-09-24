@@ -3,7 +3,7 @@ package com.example.egstask.controller;
 import com.example.egstask.model.dto.request.LoginReq;
 import com.example.egstask.model.dto.request.RegisterUserReq;
 import com.example.egstask.model.dto.response.LoginRes;
-import com.example.egstask.model.dto.response.RegisterUserRes;
+import com.example.egstask.model.dto.response.UserRes;
 import com.example.egstask.model.dto.response.Response;
 import com.example.egstask.model.entity.EgsUser;
 import com.example.egstask.model.entity.Role;
@@ -13,6 +13,7 @@ import com.example.egstask.model.service.security.Oauth2Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,12 +36,13 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Response<RegisterUserRes>> register(HttpServletRequest request,
-                                                              @Valid @RequestBody RegisterUserReq userDto) {
+    public ResponseEntity<Response<UserRes>> register(HttpServletRequest request,
+                                                      @Valid @RequestBody RegisterUserReq userDto) {
         Role role = roleService.findByRole(userDto.getRole().toString());
         EgsUser user = userService.registerUser(userDto, role);
-        RegisterUserRes registerUserRes = new RegisterUserRes(user);
-        Response<RegisterUserRes> response = new Response<RegisterUserRes>("OK", request.getRequestURI()).setMessage(registerUserRes);
+        UserRes userRes = new UserRes(user);
+        Response<UserRes> response =
+                new Response<UserRes>("OK", request.getRequestURI()).setMessage(userRes);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -49,9 +51,14 @@ public class UserController {
                                                     @Valid @RequestBody LoginReq loginReq) {
         EgsUser user = userService.login(loginReq);
         LoginRes loginRes = new LoginRes(user);
-        loginRes.setToken(oauth2Service.getToken(loginReq.getUsername(), loginReq.getPassword(), user.getRoles()));
+        loginRes.setToken(oauth2Service.getToken(user, loginReq.getUsername(), loginReq.getPassword(), user.getRoles()));
         Response<LoginRes> response = new Response<LoginRes>("OK", request.getRequestURI()).setMessage(loginRes);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "asd";
     }
 
 }

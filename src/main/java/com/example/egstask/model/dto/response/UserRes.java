@@ -8,14 +8,14 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class RegisterUserRes {
+public class UserRes {
 
     private long id;
     private String username;
     private Date created;
     private Date updated;
 
-    public RegisterUserRes(EgsUser user) {
+    public UserRes(EgsUser user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.created = user.getCreated();

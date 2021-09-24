@@ -20,7 +20,7 @@ import java.util.Set;
 public class EgsUser implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "user_seq", allocationSize = 1)
     private long id;
 
@@ -31,13 +31,6 @@ public class EgsUser implements Serializable {
     @Column
     @JsonIgnore
     private String password;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_role", joinColumns = @JoinColumn(name = "egs_user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    @Getter(onMethod = @__(@JsonIgnore))
-    @Setter
-    private Set<Role> roles;
 
     @Column
     @JsonIgnore
@@ -51,5 +44,12 @@ public class EgsUser implements Serializable {
 
     @Transient
     private TokenRes token;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_role", joinColumns = @JoinColumn(name = "egs_user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+    @Getter(onMethod = @__(@JsonIgnore))
+    @Setter
+    private Set<Role> roles;
 
 }

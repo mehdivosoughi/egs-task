@@ -1,5 +1,6 @@
 package com.example.egstask.model.service;
 
+import com.example.egstask.enums.RoleEnum;
 import com.example.egstask.exception.BadRequestException;
 import com.example.egstask.exception.NotFoundException;
 import com.example.egstask.model.dto.request.LoginReq;
@@ -40,6 +41,7 @@ public class UserService {
         EgsUser user = EgsUser.builder()
                 .password(passwordEncoder.encode(userDto.getPassword()))
                 .username(userDto.getUsername())
+                .locked(false)
                 .created(new Date())
                 .updated(new Date())
                 .roles(new HashSet<>(Collections.singletonList(role)))
@@ -57,4 +59,27 @@ public class UserService {
             throw new BadRequestException(INVALID_PASSWORD);
         return user;
     }
+
+    public void lockUser(Long userId) {
+        EgsUser user = findById(userId);
+        for (Role role : user.getRoles())
+            if (role.getRole().equals(RoleEnum.ROLE_ADMIN.toString()))
+                throw new BadRequestException(BAD_REQUEST);
+        user.setLocked(true);
+        userRepository.save(user);
+    }
+
+    public void unLockUser(Long userId) {
+        EgsUser user = findById(userId);
+        user.setLocked(false);
+        userRepository.save(user);
+    }
+
+    public EgsUser findById(Long userId) {
+        Optional<EgsUser> userOptional = userRepository.findById(userId);
+        if (!userOptional.isPresent())
+            throw new NotFoundException(NOT_FOUND);
+        return userOptional.get();
+    }
+
 }
